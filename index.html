@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruitment Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f9;--surface:#fff;--surface2:#f8fafc;--border:#e2e8f0;--border-light:#f1f5f9;--primary:#2563eb;--primary-light:#eff6ff;--primary-mid:#bfdbfe;--success:#16a34a;--success-light:#f0fdf4;--success-mid:#bbf7d0;--warning:#d97706;--warning-light:#fffbeb;--warning-mid:#fde68a;--danger:#dc2626;--danger-light:#fef2f2;--danger-mid:#fecaca;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text-primary);font-family:'Sarabun','DM Sans',sans-serif;min-height:100vh;font-size:14px;line-height:1.6}
+#loading{position:fixed;inset:0;background:rgba(244,246,249,.96);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--text-secondary);font-size:13px;font-weight:500}
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#60a5fa);display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-title{font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:-.3px}
+.nav-sub{font-size:11px;color:var(--text-muted)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.badge-live{display:flex;align-items:center;gap:6px;background:var(--success-light);border:1px solid var(--success-mid);color:var(--success);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:livepulse 2s infinite}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.page-tabs{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:4px}
+.page-tab{padding:6px 18px;border-radius:8px;border:none;background:transparent;color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Sarabun',sans-serif;white-space:nowrap}
+.page-tab:hover{color:var(--primary)}
+.page-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+.btn{display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);font-size:12px;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all .18s;font-family:'Sarabun',sans-serif;white-space:nowrap}
+.btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.btn.success{background:var(--success);color:#fff;border-color:var(--success)}
+.btn.success:hover{background:#15803d}
+.btn.spinning svg{animation:spin .7s linear infinite}
+#last-updated{font-size:11px;color:var(--text-muted)}
+.main{max-width:1400px;margin:0 auto;padding:28px 32px 60px;display:none}
+#error-box{display:none;margin:20px 32px;background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius);padding:16px 20px;font-size:13px;color:var(--danger)}
+#error-box strong{display:block;margin-bottom:4px;font-weight:700}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.page-header h2{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.page-header p{font-size:13px;color:var(--text-muted);margin-top:3px}
+.header-meta{text-align:right;font-size:12px;color:var(--text-muted)}
+.filter-bar{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:24px;box-shadow:var(--shadow-sm);flex-wrap:wrap}
+.filter-label{font-size:12px;font-weight:700;color:var(--text-secondary);margin-right:4px;white-space:nowrap}
+.filter-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Sarabun',sans-serif}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+.filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter-divider{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.filter-info{margin-left:auto;font-size:12px;color:var(--text-muted);white-space:nowrap}
+.section{margin-bottom:28px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.section-icon.blue{background:var(--primary-light)}.section-icon.green{background:var(--success-light)}.section-icon.yellow{background:var(--warning-light)}.section-icon.red{background:var(--danger-light)}
+.section-header h3{font-size:13px;font-weight:700;color:var(--text-primary);letter-spacing:.5px;text-transform:uppercase}
+.section-header span{font-size:12px;color:var(--text-muted);margin-left:auto}
+.divider{height:1px;background:var(--border-light);margin:4px 0 24px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-2-1{display:grid;grid-template-columns:1fr 1.6fr;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;animation:fadeUp .4s ease both}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.stat-card{position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 12px 12px}
+.stat-card.blue::after{background:linear-gradient(90deg,var(--primary),#60a5fa)}.stat-card.green::after{background:linear-gradient(90deg,var(--success),#4ade80)}.stat-card.yellow::after{background:linear-gradient(90deg,var(--warning),#fbbf24)}.stat-card.red::after{background:linear-gradient(90deg,var(--danger),#f87171)}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.stat-icon.blue{background:var(--primary-light)}.stat-icon.green{background:var(--success-light)}.stat-icon.yellow{background:var(--warning-light)}.stat-icon.red{background:var(--danger-light)}
+.stat-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.stat-value{font-size:38px;font-weight:700;line-height:1;letter-spacing:-1px}
+.stat-card.blue .stat-value{color:var(--primary)}.stat-card.green .stat-value{color:var(--success)}.stat-card.yellow .stat-value{color:var(--warning)}.stat-card.red .stat-value{color:var(--danger)}
+.stat-sub{font-size:12px;color:var(--text-muted);margin-top:8px}
+.target-card{position:relative}
+.target-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.target-pos{font-size:14px;font-weight:700;color:var(--text-primary)}.target-pos-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.status-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.3px;white-space:nowrap}
+.status-badge.recruiting{background:var(--warning-light);color:var(--warning);border:1px solid var(--warning-mid)}
+.status-badge.closed{background:var(--success-light);color:var(--success);border:1px solid var(--success-mid)}
+.status-badge.none{background:var(--danger-light);color:var(--danger);border:1px solid var(--danger-mid)}
+.target-stats{display:flex;gap:16px;margin-bottom:14px}
+.ts-item{flex:1}.ts-label{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.ts-val{font-size:22px;font-weight:700;line-height:1.2}
+.prog-bar-track{background:var(--border-light);border-radius:99px;height:8px;overflow:hidden;margin-bottom:6px}
+.prog-bar-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.prog-pct{font-size:12px;font-weight:700;text-align:right}
+.target-card.yellow .ts-val{color:var(--warning)}.target-card.yellow .prog-bar-fill{background:linear-gradient(90deg,var(--warning),#fbbf24)}.target-card.yellow .prog-pct{color:var(--warning)}.target-card.yellow{border-top:3px solid var(--warning)}
+.target-card.green .ts-val{color:var(--success)}.target-card.green .prog-bar-fill{background:linear-gradient(90deg,var(--success),#4ade80)}.target-card.green .prog-pct{color:var(--success)}.target-card.green{border-top:3px solid var(--success)}
+.target-card.red .ts-val{color:var(--danger)}.target-card.red .prog-bar-fill{background:linear-gradient(90deg,var(--danger),#f87171)}.target-card.red .prog-pct{color:var(--danger)}.target-card.red{border-top:3px solid var(--danger)}
+.funnel-wrap{display:flex;flex-direction:column;gap:6px}
+.funnel-step{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid transparent;transition:all .15s}
+.funnel-step:hover{transform:translateX(3px)}
+.funnel-step.s-blue{background:var(--primary-light);border-color:var(--primary-mid)}.funnel-step.s-yellow{background:var(--warning-light);border-color:var(--warning-mid)}.funnel-step.s-green{background:var(--success-light);border-color:var(--success-mid)}.funnel-step.s-red{background:var(--danger-light);border-color:var(--danger-mid)}
+.funnel-icon{font-size:18px;flex-shrink:0}.funnel-label{flex:1;font-size:13px;font-weight:600;color:var(--text-primary)}
+.funnel-val{font-size:24px;font-weight:700}
+.s-blue .funnel-val{color:var(--primary)}.s-yellow .funnel-val{color:var(--warning)}.s-green .funnel-val{color:var(--success)}.s-red .funnel-val{color:var(--danger)}
+.funnel-pct{font-size:11px;color:var(--text-muted);font-weight:600;text-align:right;min-width:36px}
+.funnel-arrow{text-align:center;color:var(--text-muted);font-size:11px;padding-left:16px}
+.bar-list{display:flex;flex-direction:column;gap:11px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-lbl{font-size:12px;color:var(--text-secondary);font-weight:500;text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:var(--border-light);border-radius:99px;height:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:700;color:#fff;min-width:28px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.bf-blue{background:linear-gradient(90deg,#2563eb,#60a5fa)}.bf-green{background:linear-gradient(90deg,#16a34a,#4ade80)}.bf-yellow{background:linear-gradient(90deg,#d97706,#fbbf24)}.bf-purple{background:linear-gradient(90deg,#7c3aed,#a78bfa)}.bf-red{background:linear-gradient(90deg,#dc2626,#f87171)}.bf-gray{background:linear-gradient(90deg,#64748b,#94a3b8)}
+.tbl{width:100%;border-collapse:collapse;border:1px solid var(--border)}
+.tbl thead tr{background:var(--surface2)}
+.tbl th{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;border:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:10px 12px;font-size:13px;border:1px solid var(--border-light);color:var(--text-primary)}
+.tbl tr:hover td{background:var(--surface2)}
+.tbl thead th{background:var(--primary-light);color:var(--primary);border-color:var(--primary-mid)}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.pill-g{background:var(--success-light);color:var(--success)}.pill-r{background:var(--danger-light);color:var(--danger)}.pill-y{background:var(--warning-light);color:var(--warning)}.pill-b{background:var(--primary-light);color:var(--primary)}
+.mono{font-weight:600}
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s;animation:fadeUp .4s ease both;border-left:3px solid transparent}
+.insight-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.insight-card.ins-blue{border-left-color:var(--primary)}.insight-card.ins-green{border-left-color:var(--success)}.insight-card.ins-yellow{border-left-color:var(--warning)}.insight-card.ins-red{border-left-color:var(--danger)}
+.ins-title{font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.ins-body{font-size:12px;color:var(--text-secondary);line-height:1.7}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.15);width:100%;max-width:620px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:16px;font-weight:700;color:var(--text-primary)}
+.modal-header p{font-size:12px;color:var(--text-muted);margin-top:2px}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-muted);transition:all .15s;flex-shrink:0}
+.modal-close:hover{background:var(--danger-light);border-color:var(--danger-mid);color:var(--danger)}
+.modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+.form-input{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text-primary);font-family:'Sarabun',sans-serif;background:var(--surface);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.score-section{background:var(--surface2);border-radius:var(--radius);padding:16px;border:1px solid var(--border-light)}
+.score-section-title{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.score-item{margin-bottom:12px}
+.score-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.score-item-label{font-size:13px;font-weight:600;color:var(--text-primary)}
+.score-badge{font-size:13px;font-weight:700;min-width:36px;text-align:center;padding:2px 8px;border-radius:6px;background:var(--primary-light);color:var(--primary)}
+
+.score-total-bar{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.score-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.score-total-label{font-size:13px;font-weight:700;color:var(--text-primary)}
+.score-total-val{font-size:20px;font-weight:700;color:var(--primary)}
+.score-total-track{background:var(--border-light);border-radius:99px;height:10px;overflow:hidden}
+.score-total-fill{height:100%;border-radius:99px;transition:width .5s;background:linear-gradient(90deg,var(--primary),#60a5fa)}
+
+.score-tbl tbody tr:nth-child(even) td{background:#fafbfc}
+.score-tbl tbody tr:nth-child(even):hover td{background:var(--surface2)}
+.score-tbl td{text-align:center}
+.score-tbl td:first-child,.score-tbl td:nth-child(2),.score-tbl td:last-child,.score-tbl td:nth-last-child(2){text-align:left}
+.star{color:#fbbf24;font-size:12px}.star.empty{color:var(--border)}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}.grid-2-1{grid-template-columns:1fr}}
+@media(max-width:700px){.main{padding:20px 16px}.topnav{padding:0 16px}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center;max-width:320px">
+    <div class="spinner" style="margin:0 auto 20px"></div>
+    <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:8px">Recruitment Review</div>
+    <div id="loading-msg" style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">กำลังเชื่อมต่อ Google Sheet...</div>
+    <div style="background:var(--border-light);border-radius:99px;height:4px;overflow:hidden;width:100%">
+      <div id="loading-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),#60a5fa);border-radius:99px;transition:width .4s ease"></div>
+    </div>
+    <div id="loading-timeout" style="display:none;margin-top:16px;padding:12px 16px;background:var(--warning-light);border:1px solid var(--warning-mid);border-radius:10px;font-size:12px;color:var(--warning)">
+      ⏳ ใช้เวลานานกว่าปกติ... Apps Script อาจกำลัง warm up<br>กรุณารอสักครู่
+    </div>
+  </div>
+</div>
+
+<!-- Scoring Modal -->
+<div class="modal-overlay" id="scoring-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div><h3 id="modal-title">📝 บันทึกผลสัมภาษณ์</h3><p id="modal-sub">เลือกผู้สมัครที่มาสัมภาษณ์</p></div>
+      <button class="modal-close" onclick="closeScoring()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ชื่อ-นามสกุล</label>
+          <select class="form-input" id="sc-name" onchange="onCandidateSelect()"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ตำแหน่ง</label>
+          <input class="form-input" id="sc-pos" type="text" readonly style="background:var(--surface2)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">วันที่สัมภาษณ์</label>
+          <input class="form-input" id="sc-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ผู้สัมภาษณ์</label>
+          <input class="form-input" id="sc-interviewer" type="text" placeholder="ชื่อผู้สัมภาษณ์">
+        </div>
+      </div>
+      <div class="score-section">
+        <div class="score-section-title">🎯 เกณฑ์การประเมิน (คะแนนเต็ม 10 ต่อหัวข้อ)</div>
+        <div id="score-grid"></div>
+        <div class="score-total-bar">
+          <div class="score-total-row">
+            <span class="score-total-label">คะแนน (ถ่วงน้ำหนักตามตำแหน่ง)</span>
+            <span class="score-total-val" id="score-total-display">0 / 50</span>
+          </div>
+          <div class="score-total-track"><div class="score-total-fill" id="score-total-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมายเหตุ / ข้อสังเกต</label>
+        <textarea class="form-input" id="sc-note" rows="3" style="resize:vertical" placeholder="จุดเด่น จุดอ่อน หรือข้อสังเกตอื่นๆ"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeScoring()">ยกเลิก</button>
+      <button class="btn success" id="btn-save-score" onclick="saveScore()">💾 บันทึกคะแนน</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="topnav">
+  <div class="nav-brand">
+    <div class="nav-logo">👥</div>
+    <div><div class="nav-title">Recruitment Review</div><div class="nav-sub">ระบบคัดเลือกและประเมินผล · Real-time</div></div>
+  </div>
+  <div class="page-tabs">
+    <button class="page-tab active" id="tab-main" onclick="switchPage('main')">📊 Overview</button>
+    <button class="page-tab" id="tab-scoring" onclick="switchPage('scoring')">🏆 Scoring</button>
+  </div>
+  <div class="nav-right">
+    <span id="last-updated"></span>
+    <div class="badge-live"><div class="live-dot"></div> Live</div>
+    <button class="btn" id="btn-open-scoring" onclick="openScoring()">📝 บันทึกคะแนน</button>
+    <button class="btn" id="btn-refresh" onclick="loadData()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Refresh
+    </button>
+  </div>
+</nav>
+
+<div id="error-box"><strong>⚠️ ไม่สามารถดึงข้อมูลได้</strong><span id="error-msg"></span></div>
+
+<div class="main" id="page-main">
+  <div class="page-header">
+    <div><h2>Recruitment Overview</h2><p id="data-range">กำลังโหลด...</p></div>
+    <div class="header-meta" id="header-meta"></div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <span class="filter-label">📅 กรองตามเดือน:</span>
+    <button class="filter-btn active" onclick="setFilter('all')" id="filter-all">ทั้งหมด</button>
+    <div class="filter-divider"></div>
+    <div id="filter-months" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <span class="filter-info" id="filter-info"></span>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="section">
+    <div class="section-header"><div class="section-icon blue">📊</div><h3>Recruitment Pipeline</h3><span id="pipeline-sub"></span></div>
+    <div class="grid-4">
+      <div class="card stat-card blue" style="animation-delay:.05s"><div class="stat-icon blue">📥</div><div class="stat-label">ผู้สมัครทั้งหมด</div><div class="stat-value" id="kpi-total">—</div><div class="stat-sub" id="kpi-months">—</div></div>
+      <div class="card stat-card yellow" style="animation-delay:.1s"><div class="stat-icon yellow">📞</div><div class="stat-label">นัดสัมภาษณ์</div><div class="stat-value" id="kpi-invited">—</div><div class="stat-sub" id="kpi-invited-pct">—</div></div>
+      <div class="card stat-card green" style="animation-delay:.15s"><div class="stat-icon green">🏢</div><div class="stat-label">มาสัมภาษณ์จริง</div><div class="stat-value" id="kpi-showed">—</div><div class="stat-sub" id="kpi-showed-pct">—</div></div>
+      <div class="card stat-card red" style="animation-delay:.2s"><div class="stat-icon red">✅</div><div class="stat-label">ผ่านสัมภาษณ์</div><div class="stat-value" id="kpi-passed">—</div><div class="stat-sub" id="kpi-passed-pct">—</div></div>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Hiring Target -->
+  <div class="section">
+    <div class="section-header"><div class="section-icon yellow">🎯</div><h3>Hiring Target Progress</h3><span>อัปเดตจาก Sheet "Target" · Realtime</span></div>
+    <div class="grid-3" id="target-cards"><div style="color:var(--text-muted);font-size:13px;padding:20px">กำลังโหลด...</div></div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Funnel + Channel -->
+  <div class="section">
+    <div class="grid-2-1">
+      <div class="card" style="animation-delay:.1s">
+        <div class="section-header" style="margin-bottom:14px"><div class="section-icon blue">🔽</div><h3>Recruitment Funnel</h3></div>
+        <div class="funnel-wrap" id="funnel"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="animation-delay:.15s;flex:1">
+          <div class="section-header" style="margin-bottom:14px"><div class="section-icon blue">📡</div><h3>ช่องทางการสมัคร</h3></div>
+          <div class="bar-list" id="bar-channel"></div>
+        </div>
+        <div class="card" style="animation-delay:.2s;flex:1">
+          <div class="section-header" style="margin-bottom:14px"><div class="section-icon yellow">📋</div><h3>ตำแหน่งที่สมัคร</h3></div>
+          <div class="bar-list" id="bar-position"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Reasons + Monthly -->
+  <div class="section">
+    <div class="grid-2">
+      <div class="card" style="animation-delay:.1s">
+        <div class="section-header" style="margin-bottom:14px"><div class="section-icon red">❌</div><h3>สาเหตุที่ไม่นัดสัมภาษณ์</h3></div>
+        <div class="bar-list" id="bar-reason"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="animation-delay:.15s">
+          <div class="section-header" style="margin-bottom:14px"><div class="section-icon green">📅</div><h3>สรุปรายเดือน</h3></div>
+          <table class="tbl"><thead><tr><th>เดือน</th><th>สมัคร</th><th>นัด</th><th>มา</th><th>ผ่าน</th><th>Rate</th></tr></thead><tbody id="tbl-month"></tbody></table>
+        </div>
+        <div class="card" id="noshow-card" style="animation-delay:.2s;display:none">
+          <div class="section-header" style="margin-bottom:14px"><div class="section-icon yellow">🚫</div><h3>สาเหตุที่ไม่มาตามนัด</h3></div>
+          <div class="bar-list" id="bar-noshow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+
+</div><!-- end page-main -->
+
+<div class="main" id="page-scoring" style="display:none">
+
+  <!-- Scoring Page Header -->
+  <div class="page-header">
+    <div><h2>🏆 Scoring & Analytics</h2><p>ผลคะแนนสัมภาษณ์และการวิเคราะห์</p></div>
+    <div class="header-meta" id="scoring-meta"></div>
+  </div>
+
+  <!-- Scoring Results -->
+  <div class="section">
+    <div class="section-header"><div class="section-icon blue">🏆</div><h3>ผลคะแนนสัมภาษณ์</h3><span id="score-count-label"></span>
+      <a href="https://docs.google.com/spreadsheets/d/1CJdUcQBHFRJLdpElgfY-NnUs_f_hnHxNLOWfKjiEfs8/edit#gid=0" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--primary-light);border:1px solid var(--primary-mid);color:var(--primary);border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">
+        📊 แก้ไขใน Google Sheet
+      </a>
+    </div>
+    <div class="card" style="animation-delay:.1s;overflow-x:auto">
+      <table class="tbl score-tbl" id="score-table" style="display:none"><thead><tr id="score-thead"></tr></thead><tbody id="score-tbody"></tbody></table>
+      <div id="score-empty" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+        ยังไม่มีข้อมูลคะแนนสัมภาษณ์ · กดปุ่ม <strong>"📝 บันทึกคะแนน"</strong> ด้านบนเพื่อเริ่มต้น
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="divider"></div>
+
+
+  <!-- Score Charts: 2-column layout -->
+  <div class="section" id="score-charts-section" style="display:none">
+    <div class="section-header" style="margin-bottom:16px"><div class="section-icon blue">📈</div><h3>Score Analytics</h3><span id="chart-sub"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- Left: Total score bar chart -->
+      <div class="card" style="animation-delay:.1s">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">🏆 คะแนนรวมรายคน (เต็ม 100)</div>
+        <canvas id="chart-total" height="280"></canvas>
+      </div>
+      <!-- Right: Radar chart -->
+      <div class="card" style="animation-delay:.15s">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">🕸️ Radar Chart</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <select id="radar-select" onchange="updateRadar()" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-primary);background:var(--surface);font-family:'Sarabun',sans-serif;outline:none">
+              <option value="all">ค่าเฉลี่ยทุกคน</option>
+            </select>
+            <select id="radar-compare" onchange="updateRadar()" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-primary);background:var(--surface);font-family:'Sarabun',sans-serif;outline:none">
+              <option value="">— เปรียบเทียบกับ —</option>
+            </select>
+          </div>
+        </div>
+        <canvas id="chart-radar" height="280"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="divider" id="chart-divider" style="display:none"></div>
+
+  <!-- Insights -->
+  <div class="section">
+    <div class="section-header"><div class="section-icon yellow">💡</div><h3>Key Insights &amp; Recommendations</h3></div>
+    <div class="grid-3" id="insights"></div>
+  </div>
+
+</div><!-- end page-scoring -->
+
+</div>
+
+<script>
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwraQR-KkPFenFpwQsZkXMRYGh_mKmk63CmpIRlUozuc86SqHsoIuGHAlNPsTNPQ_aZZA/exec';
+const CRITERIA=[
+  {name:'บุคลิกภาพ', eng:'Personality', desc:'ลักษณะการแสดงออก ความน่าเชื่อถือ มารยาท การวางตัว ความมั่นใจ และภาพลักษณ์โดยรวม', points:['มีความมั่นใจ สุภาพ และน่าเชื่อถือ','แต่งกายและวางตัวเหมาะสม','มีทักษะการสื่อสารที่ดี','มีความเป็นมืออาชีพ']},
+  {name:'ความรู้', eng:'Knowledge', desc:'ความรู้พื้นฐานที่เกี่ยวข้องกับตำแหน่งงาน ความเข้าใจในอุตสาหกรรม และความสามารถในการเรียนรู้', points:['มีความรู้พื้นฐานตรงกับตำแหน่ง','เข้าใจลักษณะงานและหน้าที่','สามารถนำความรู้ไปประยุกต์ใช้ได้','มีความพร้อมในการพัฒนาตนเอง']},
+  {name:'ประสบการณ์', eng:'Experience', desc:'ประสบการณ์ทำงานที่ผ่านมา ความรับผิดชอบ ผลงาน และความเชื่อมโยงกับตำแหน่งที่สมัคร', points:['มีประสบการณ์ที่สามารถต่อยอดได้','เคยรับผิดชอบงานที่ใกล้เคียงกับตำแหน่ง','มีผลงานหรือความสำเร็จที่วัดผลได้','สามารถปรับตัวและทำงานได้จริง']},
+  {name:'ทัศนคติ', eng:'Attitude', desc:'แนวคิด มุมมองในการทำงาน ความรับผิดชอบ ความกระตือรือร้น และวิธีรับมือกับปัญหา', points:['มีทัศนคติเชิงบวกต่อการทำงาน','มีความรับผิดชอบและพร้อมพัฒนาตนเอง','เปิดรับการเรียนรู้และคำแนะนำ','มีความมุ่งมั่นและมีเป้าหมาย']},
+  {name:'ภาษาอังกฤษ', eng:'English Proficiency', desc:'ความสามารถในการฟัง พูด อ่าน และเขียนภาษาอังกฤษ รวมถึงการนำไปใช้ในการทำงานจริง', points:['สื่อสารภาษาอังกฤษได้เหมาะสมกับตำแหน่ง','อ่านและเข้าใจเอกสารภาษาอังกฤษได้','สื่อสารกับลูกค้าหรือคู่ค้าต่างประเทศได้','มีความมั่นใจในการใช้ภาษาอังกฤษ']},
+  {name:'ความเหมาะสมกับองค์กร', eng:'Organizational Fit', desc:'ความเหมาะสมกับวัฒนธรรมองค์กร ลักษณะการทำงาน ทีมงาน และแนวทางการดำเนินงาน', points:['มีค่านิยมสอดคล้องกับองค์กร','สามารถทำงานร่วมกับผู้อื่นได้ดี','มีความยืดหยุ่นและปรับตัวได้','มีแนวโน้มเติบโตกับองค์กรในระยะยาว']},
+  {name:'การตอบคำถาม', eng:'Communication & Response', desc:'ความสามารถในการคิด วิเคราะห์ เรียบเรียงคำตอบ และการแก้ไขสถานการณ์เฉพาะหน้า', points:['ตอบคำถามได้ตรงประเด็นและมีเหตุผล','มีลำดับความคิดที่ชัดเจน','สามารถอธิบายสถานการณ์ได้ดี','มีไหวพริบและแก้ไขสถานการณ์เฉพาะหน้าได้']},
+];
+
+// น้ำหนักคะแนนตามตำแหน่ง (รวม 100%)
+const WEIGHTS = {
+  'Sale & Customer Service': [10,20,20,15,10,10,15],
+  'Product Specialist':      [15,20,20,10,15,10,10],
+  'Import & Register':       [15,15,15,10,25,10,10],
+  'default':                 [14,14,14,15,14,15,14],
+};
+const PASS_SCORE = 70; // เกณฑ์ผ่าน
+
+function calcWeightedScore(s, pos) {
+  // Values stored in sheet are already weighted (e.g. 0-10 for 10% weight)
+  // Just sum them directly to get /100 score
+  return Math.round(CRITERIA.reduce(function(sum,c){
+    return sum + (parseFloat(s[c.name])||0);
+  },0)*10)/10;
+}
+const POS_META={'Sale & Customer Service':{icon:'💼',sub:'ฝ่ายขายและบริการลูกค้า'},'Import & Register':{icon:'📦',sub:'ฝ่ายนำเข้าและจดทะเบียน'},'Product Specialist':{icon:'🔬',sub:'ผู้เชี่ยวชาญผลิตภัณฑ์'}};
+const CH_COLORS=['bf-blue','bf-purple','bf-yellow','bf-green','bf-gray'];
+const R_COLORS=['bf-red','bf-yellow','bf-purple','bf-blue','bf-green','bf-gray','bf-gray'];
+const M_ORDER=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+let allCandidates=[],allTargets=[],allScoring=[],activeFilter='all';
+let editingRowIndex=null; // track which row we're editing
+
+function pct(a,b){return b===0?'0%':Math.round(a/b*100)+'%'}
+function str(v){return String(v||'').trim()}
+function renderBars(id,data,lw='110px'){
+  const max=Math.max(...data.map(d=>d.val),1);
+  document.getElementById(id).innerHTML=data.map(d=>`<div class="bar-row"><div class="bar-lbl" style="width:${lw}">${d.label}</div><div class="bar-track"><div class="bar-fill ${d.color}" style="width:${Math.round(d.val/max*100)}%">${d.val}</div></div></div>`).join('');
+}
+
+function setFilter(m){
+  activeFilter=m;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(m==='all'?'filter-all':'filter-'+m)?.classList.add('active');
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const clean=allCandidates.filter(r=>str(r['ชื่อ-นามสกุล']));
+  const filtered=activeFilter==='all'?clean:clean.filter(r=>str(r['คอลัมน์ 1'])===activeFilter);
+  const total=filtered.length,invited=filtered.filter(r=>str(r['ผลการโทร'])==='นัด').length;
+  const showed=filtered.filter(r=>str(r['สถานะการมาจริง'])==='มา').length;
+  const passed=filtered.filter(r=>str(r['ผลสัมภาษณ์'])==='ผ่าน'||str(r['สนใจ/ไม่สนใจ'])==='สนใจ').length;
+  const didntShow=filtered.filter(r=>str(r['สถานะการมาจริง'])==='ไม่มา').length;
+  const months=[...new Set(clean.map(r=>r['คอลัมน์ 1']).filter(Boolean))];
+
+  document.getElementById('filter-info').textContent=activeFilter==='all'?`แสดงทั้งหมด ${total} คน`:`เดือน${activeFilter} · ${total} คน`;
+  document.getElementById('data-range').textContent=activeFilter==='all'?`ข้อมูลการสมัครงาน · ${months.join(', ')} 2569`:`ข้อมูลเดือน${activeFilter} 2569`;
+  document.getElementById('pipeline-sub').textContent=`ข้อมูลรวม ${total} คน`;
+  document.getElementById('kpi-total').textContent=total;
+  document.getElementById('kpi-months').textContent=activeFilter==='all'?`จาก ${months.length} เดือน`:`เดือน${activeFilter}`;
+  document.getElementById('kpi-invited').textContent=invited;
+  document.getElementById('kpi-invited-pct').textContent=pct(invited,total)+' ของผู้สมัคร';
+  document.getElementById('kpi-showed').textContent=showed;
+  document.getElementById('kpi-showed-pct').textContent=pct(showed,invited)+' ของที่นัด';
+  document.getElementById('kpi-passed').textContent=passed;
+  document.getElementById('kpi-passed-pct').textContent=passed>0?pct(passed,showed)+' conversion':'ยังไม่มีผู้ผ่าน';
+
+  document.getElementById('funnel').innerHTML=[
+    {cls:'s-blue',icon:'📥',label:'สมัครเข้ามา',val:total,base:total},
+    {cls:'s-yellow',icon:'📞',label:'นัดสัมภาษณ์',val:invited,base:total},
+    {cls:'s-green',icon:'🏢',label:'มาสัมภาษณ์จริง',val:showed,base:total},
+    {cls:'s-red',icon:'✅',label:'ผ่านสัมภาษณ์',val:passed,base:total},
+  ].map((s,i)=>`${i>0?'<div class="funnel-arrow">▼</div>':''}<div class="funnel-step ${s.cls}"><div class="funnel-icon">${s.icon}</div><div class="funnel-label">${s.label}</div><div class="funnel-val">${s.val}</div><div class="funnel-pct">${pct(s.val,s.base)}</div></div>`).join('');
+
+  const chMap={};filtered.forEach(r=>{const c=str(r['ช่องทางการสมัคร'])||'ไม่ระบุ';chMap[c]=(chMap[c]||0)+1;});
+  const chSorted=Object.entries(chMap).sort((a,b)=>b[1]-a[1]);
+  renderBars('bar-channel',chSorted.map(([l,v],i)=>({label:l,val:v,color:CH_COLORS[i%CH_COLORS.length]})),'80px');
+  const posMap={};filtered.forEach(r=>{const p=str(r['ตำแหน่งที่สมัคร'])||'ไม่ระบุ';posMap[p]=(posMap[p]||0)+1;});
+  renderBars('bar-position',Object.entries(posMap).sort((a,b)=>b[1]-a[1]).map(([l,v],i)=>({label:l,val:v,color:CH_COLORS[i%CH_COLORS.length]})),'80px');
+
+  // สาเหตุที่ไม่นัด
+  const rMap={};
+  filtered.forEach(function(r){
+    let k=str(r['สาเหตุที่ไม่นัด']);if(!k)return;
+    if(k.includes('ประสบการณ์')||k.includes('คุณสมบัติ')||k.includes('รายได้สูง'))k='คุณสมบัติไม่ผ่าน';
+    else if(k.includes('เงินเดือน')||k.includes('รายได้')||k.includes('สวัสดิการ'))k='เงินเดือน/สวัสดิการ';
+    else if(k.includes('ได้งาน'))k='ได้งานแล้ว';
+    else if(k.includes('ยังไม่ตัดสินใจ'))k='ยังไม่ตัดสินใจ';
+    else if(k.includes('รายละเอียด'))k='รายละเอียดงานไม่ตรง';
+    else if(k.includes('ติดต่อไม่ได้')||k.includes('ไม่ติดต่อกลับ'))k='ติดต่อไม่ได้';
+    rMap[k]=(rMap[k]||0)+1;
+  });
+  renderBars('bar-reason',Object.entries(rMap).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(e,i){return {label:e[0],val:e[1],color:R_COLORS[i]};}),'140px');
+
+  // สาเหตุที่ไม่มาตามนัด
+  const noShowMap={};
+  filtered.forEach(function(r){
+    const k=str(r['สาเหตุที่ไม่มา']);if(!k)return;
+    noShowMap[k]=(noShowMap[k]||0)+1;
+  });
+  const noShowEl=document.getElementById('bar-noshow');
+  if(noShowEl){
+    const noShowData=Object.entries(noShowMap).sort(function(a,b){return b[1]-a[1];});
+    if(noShowData.length){
+      renderBars('bar-noshow',noShowData.map(function(e,i){return {label:e[0],val:e[1],color:R_COLORS[i]};}),'160px');
+      document.getElementById('noshow-card').style.display='block';
+    } else {
+      document.getElementById('noshow-card').style.display='none';
+    }
+  }
+
+  const mData={};
+  filtered.forEach(r=>{
+    const m=str(r['คอลัมน์ 1'])||'ไม่ระบุ';
+    if(!mData[m])mData[m]={total:0,invited:0,showed:0,passed:0};
+    mData[m].total++;
+    if(str(r['ผลการโทร'])==='นัด')mData[m].invited++;
+    if(str(r['สถานะการมาจริง'])==='มา')mData[m].showed++;
+    if(str(r['ผลสัมภาษณ์'])==='ผ่าน'||str(r['สนใจ/ไม่สนใจ'])==='สนใจ')mData[m].passed++;
+  });
+  document.getElementById('tbl-month').innerHTML=Object.keys(mData).sort((a,b)=>(M_ORDER.indexOf(a)+1||99)-(M_ORDER.indexOf(b)+1||99)).map(m=>{
+    const d=mData[m],rate=d.showed>0?pct(d.passed,d.showed):'—',pc=d.passed>0?'pill-g':(d.showed===0?'pill-y':'pill-r');
+    return `<tr><td><strong>${m}</strong></td><td class="mono">${d.total}</td><td class="mono">${d.invited}</td><td class="mono">${d.showed}</td><td class="mono" style="color:${d.passed>0?'var(--success)':'var(--danger)'}">${d.passed}</td><td><span class="pill ${pc}">${rate}</span></td></tr>`;
+  }).join('');
+
+  const topCh=chSorted[0],topR=Object.entries(rMap).sort((a,b)=>b[1]-a[1])[0];
+  const showRate=invited>0?Math.round(showed/invited*100):0;
+  document.getElementById('insights').innerHTML=[
+    {cls:'ins-red',icon:'⚠️',title:passed===0?'ยังไม่มีผู้ผ่านสัมภาษณ์':`ผ่านสัมภาษณ์ ${passed} คน`,body:passed===0?`จาก ${showed} คนที่มาสัมภาษณ์ ยังไม่มีใครผ่านเกณฑ์ แนะนำ review JD และ criteria การคัดเลือก`:`Conversion rate ${pct(passed,showed)} ควรวิเคราะห์ปัจจัยที่ทำให้ผ่านเพื่อนำมาใช้ใน screen รอบแรก`},
+    {cls:'ins-yellow',icon:'📉',title:`Show-up Rate ${showRate}%`,body:`มี ${didntShow} คนนัดแล้วไม่มา (${pct(didntShow,invited)}) แนะนำส่ง LINE reminder ก่อนวันสัมภาษณ์ 1 วัน`},
+    {cls:'ins-blue',icon:'📊',title:`${topCh?.[0]||'-'} เป็น Top Channel`,body:`${topCh?.[0]||'-'} มีผู้สมัคร ${topCh?.[1]||0} คน (${pct(topCh?.[1]||0,total)}) ควรวัด quality ไม่ใช่แค่ quantity`},
+    {cls:'ins-red',icon:'🔍',title:`สาเหตุหลัก: ${topR?.[0]||'-'}`,body:`พบบ่อยที่สุด ${topR?.[1]||0} ราย ควรปรับประกาศงานระบุคุณสมบัติให้ชัดเจนขึ้น`},
+    {cls:'ins-yellow',icon:'💰',title:'ระบุ Salary Range ในประกาศงาน',body:`ผู้สมัครหลายรายปฏิเสธเพราะ package ไม่ตรง การระบุ range จะช่วย pre-screen ตั้งแต่ต้น`},
+    {cls:'ins-green',icon:'📝',title:'ใช้ Scoring เพื่อ Calibrate เกณฑ์',body:`บันทึกคะแนนหลังสัมภาษณ์ทุกครั้ง เพื่อ calibrate มาตรฐานและเปรียบเทียบผู้สมัครได้อย่างเป็นระบบ`},
+  ].map((d,i)=>`<div class="insight-card ${d.cls}" style="animation-delay:${0.05+i*0.05}s"><div class="ins-title">${d.icon} ${d.title}</div><div class="ins-body">${d.body}</div></div>`).join('');
+}
+
+function renderTargets(targets){
+  const el=document.getElementById('target-cards');
+  if(!targets||!targets.length){el.innerHTML=`<div style="grid-column:1/-1;background:var(--warning-light);border:1px solid var(--warning-mid);border-radius:var(--radius);padding:16px 20px;font-size:13px;color:var(--warning)"><strong>💡 เพิ่ม Sheet "Target" เพื่อดู Hiring Progress แบบ Realtime</strong></div>`;return;}
+  el.innerHTML=targets.map((t,i)=>{
+    const pos=str(t['ตำแหน่ง']),target=parseInt(t['Target'])||0,hired=parseInt(t['Hired'])||0;
+    const remain=Math.max(target-hired,0),prog=target>0?Math.round(hired/target*100):0;
+    let cc,sc,st;
+    if(prog>=100){cc='green';sc='closed';st='ปิดตำแหน่งแล้ว';}else if(hired>0){cc='yellow';sc='recruiting';st='กำลังสรรหา';}else{cc='red';sc='none';st='ยังไม่มีผู้ผ่าน';}
+    const m=POS_META[pos]||{icon:'👤',sub:''};
+    return `<div class="card target-card ${cc}" style="animation-delay:${0.1+i*0.05}s"><div class="target-header"><div><div class="target-pos">${m.icon} ${pos}</div><div class="target-pos-sub">${m.sub}</div></div><div class="status-badge ${sc}">${st}</div></div><div class="target-stats"><div class="ts-item"><div class="ts-label">เป้าหมาย</div><div class="ts-val">${target}</div></div><div class="ts-item"><div class="ts-label">รับแล้ว</div><div class="ts-val">${hired}</div></div><div class="ts-item"><div class="ts-label">คงเหลือ</div><div class="ts-val">${remain}</div></div></div><div class="prog-bar-track"><div class="prog-bar-fill" style="width:${prog}%"></div></div><div class="prog-pct">${prog}%</div></div>`;
+  }).join('');
+}
+
+// ===== SCORING TABLE with Edit/Delete =====
+function renderScoringTable(scoring){
+  const countEl=document.getElementById('score-count-label');
+  countEl.innerHTML=scoring.length?scoring.length+' รายการ':'ยังไม่มีข้อมูล';
+  if(!scoring.length){
+    document.getElementById('score-empty').style.display='block';
+    document.getElementById('score-table').style.display='none';
+    return;
+  }
+  document.getElementById('score-empty').style.display='none';
+  document.getElementById('score-table').style.display='table';
+
+  // Sort by weighted score desc for rank
+  const withScore=scoring.map(function(s,i){
+    return {s:s, idx:i, wscore:calcWeightedScore(s,str(s['ตำแหน่ง']))};
+  }).sort(function(a,b){
+    // Sort by interview date ascending
+    const da=new Date(str(a.s['วันที่สัมภาษณ์'])||0);
+    const db=new Date(str(b.s['วันที่สัมภาษณ์'])||0);
+    return da-db;
+  });
+
+  document.getElementById('score-thead').innerHTML=
+    '<th>ชื่อ-นามสกุล</th><th>ตำแหน่ง</th><th>วันที่</th>'+
+    CRITERIA.map(function(c){return '<th style="white-space:nowrap">'+c.name+'</th>';}).join('')+
+    '<th>คะแนนรวม</th><th>ผู้สัมภาษณ์</th><th>จัดการ</th>';
+
+  document.getElementById('score-tbody').innerHTML=withScore.map(function(item){
+    const s=item.s, wscore=item.wscore, rowIdx=s._rowIndex!==undefined?s._rowIndex:item.idx;
+    let row='<tr>';
+    row+='<td><strong>'+str(s['ชื่อ-นามสกุล'])+'</strong></td>';
+    row+='<td>'+str(s['ตำแหน่ง'])+'</td>';
+    row+='<td style="white-space:nowrap">'+str(s['วันที่สัมภาษณ์'])+'</td>';
+    CRITERIA.forEach(function(c){
+      row+='<td class="mono" style="text-align:center">'+(parseFloat(s[c.name])||0)+'</td>';
+    });
+    row+='<td class="mono" style="text-align:center;font-weight:700">'+wscore+'</td>';
+    row+='<td>'+str(s['ผู้สัมภาษณ์'])+'</td>';
+    row+='<td><button onclick="deleteScore('+rowIdx+')" style="padding:4px 8px;border:1px solid var(--danger-mid);background:var(--danger-light);color:var(--danger);border-radius:6px;cursor:pointer;font-size:11px;font-weight:700">🗑️ ลบ</button></td>';
+    row+='</tr>';
+    return row;
+  }).join('');
+
+}
+
+// ===== SCORING MODAL =====
+function normPos(p){
+  if(!p)return p;
+  // Normalize position name variants to match WEIGHTS keys
+  if(p.includes('Sale')||p.includes('sale')||p.includes('CS')||p.includes('Customer'))
+    return 'Sale & Customer Service';
+  if(p.includes('Import')||p.includes('Register'))
+    return 'Import & Register';
+  if(p.includes('Product')||p.includes('Specialist'))
+    return 'Product Specialist';
+  return p;
+}
+
+function buildScoreSliders(){
+  // Get weights for selected position
+  const posRaw=str(document.getElementById('sc-pos').value);
+  const pos=normPos(posRaw);
+  const w=WEIGHTS[pos]||WEIGHTS['default'];
+  let html='';
+  CRITERIA.forEach(function(c,i){
+    const maxVal=w[i]; // max score = weight value e.g. 20 for 20%
+    const midVal=Math.round(maxVal/2);
+    html+='<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;background:var(--surface)">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    html+='<div style="flex:1">';
+    html+='<div style="font-size:13px;font-weight:700;color:var(--text-primary)">'+c.name;
+    html+=' <span style="font-size:11px;color:var(--text-muted);font-weight:400">('+c.eng+')</span></div>';
+    html+='<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">'+c.desc+'</div>';
+    if(pos){html+='<div style="font-size:11px;color:var(--warning);margin-top:4px;font-weight:600">น้ำหนัก: '+maxVal+'% · คะแนนเต็ม '+maxVal+'</div>';}
+    html+='</div>';
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:16px;flex-shrink:0">';
+    html+='<input type="number" min="0" max="'+maxVal+'" value="'+midVal+'" step="1" id="range-c'+i+'" oninput="updateTotal()" ';
+    html+='style="width:72px;padding:6px 8px;border:2px solid var(--primary-mid);border-radius:8px;font-size:20px;font-weight:700;color:var(--primary);text-align:center;outline:none;background:var(--primary-light)">';
+    html+='<span style="font-size:11px;color:var(--text-muted)">/ '+maxVal+'</span>';
+    html+='</div>';
+    html+='</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+    c.points.forEach(function(p){
+      html+='<span style="font-size:10px;background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-mid);padding:2px 8px;border-radius:20px">'+p+'</span>';
+    });
+    html+='</div>';
+    html+='</div>';
+  });
+  document.getElementById('score-grid').innerHTML=html;
+  updateTotal();
+}
+
+function updateTotal(){
+  const selPos=normPos(str(document.getElementById('sc-pos').value));
+  const w=WEIGHTS[selPos]||WEIGHTS['default'];
+  let tot=0;
+  CRITERIA.forEach(function(c,i){
+    const el=document.getElementById('range-c'+i);
+    const maxVal=w[i];
+    const val=Math.min(maxVal,Math.max(0,parseInt(el?el.value:0)||0));
+    if(el){
+      const pct=maxVal>0?val/maxVal:0;
+      el.style.borderColor=pct>=0.8?'var(--success)':pct>=0.5?'var(--primary)':'var(--danger)';
+      el.style.color=pct>=0.8?'var(--success)':pct>=0.5?'var(--primary)':'var(--danger)';
+      el.style.background=pct>=0.8?'var(--success-light)':pct>=0.5?'var(--primary-light)':'var(--danger-light)';
+    }
+    tot+=val;
+  });
+  // tot = direct sum of weighted values = score /100
+  const scoreColor=tot>=80?'var(--success)':tot>=60?'var(--warning)':'var(--danger)';
+  const fill=document.getElementById('score-total-fill');
+  if(fill){
+    fill.style.width=tot+'%';
+    fill.style.background=tot>=80?'linear-gradient(90deg,var(--success),#4ade80)':tot>=60?'linear-gradient(90deg,var(--warning),#fbbf24)':'linear-gradient(90deg,var(--danger),#f87171)';
+  }
+  document.getElementById('score-total-display').innerHTML=
+    '<span style="font-size:28px;font-weight:800;color:'+scoreColor+'">'+tot+'</span>'+
+    '<span style="font-size:14px;color:var(--text-muted)"> / 100</span>'+
+    (selPos?'<span style="font-size:11px;color:var(--primary);background:var(--primary-light);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px">'+selPos+'</span>':'');
+}
+
+function onCandidateSelect(){
+  const name=document.getElementById('sc-name').value;
+  if(!name)return;
+  const cand=allCandidates.find(function(r){return str(r['ชื่อ-นามสกุล'])===name;});
+  if(cand){
+    const pos=str(cand['ตำแหน่งที่สมัคร']);
+    document.getElementById('sc-pos').value=pos;
+    document.getElementById('modal-sub').textContent=name+' · '+pos;
+    buildScoreSliders(); // now sc-pos is set, weights will be correct
+  }
+}
+
+function openScoring(){
+  editingRowIndex=null;
+  const showed=allCandidates.filter(r=>str(r['สถานะการมาจริง'])==='มา');
+  document.getElementById('sc-name').innerHTML='<option value="">-- เลือกผู้สมัคร --</option>'+showed.map(r=>'<option value="'+str(r['ชื่อ-นามสกุล'])+'">'+str(r['ชื่อ-นามสกุล'])+'</option>').join('');
+  document.getElementById('sc-name').disabled=false;
+  document.getElementById('sc-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('sc-note').value='';
+  document.getElementById('sc-interviewer').value='';
+  document.getElementById('sc-pos').value='';
+  document.getElementById('modal-sub').textContent='เลือกผู้สมัครที่มาสัมภาษณ์';
+  document.getElementById('modal-title').textContent='📝 บันทึกผลสัมภาษณ์';
+  document.getElementById('btn-save-score').textContent='💾 บันทึกคะแนน';
+  // Show placeholder until candidate selected
+  document.getElementById('score-grid').innerHTML='<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">👆 เลือกผู้สมัครก่อน เพื่อแสดงเกณฑ์การประเมินตามตำแหน่ง</div>';
+  document.getElementById('score-total-display').innerHTML='<span style="font-size:28px;font-weight:800;color:var(--text-muted)">—</span><span style="font-size:14px;color:var(--text-muted)"> / 100</span>';
+  document.getElementById('score-total-fill').style.width='0%';
+  document.getElementById('scoring-modal').classList.add('open');
+}
+
+function editScore(rowIndex){
+  const s=allScoring.find(r=>r._rowIndex===rowIndex)||allScoring[rowIndex];
+  if(!s){alert('ไม่พบข้อมูล');return;}
+  editingRowIndex=rowIndex;
+  buildScoreSliders();
+
+  // Fill name dropdown with all showed candidates
+  const showed=allCandidates.filter(r=>str(r['สถานะการมาจริง'])==='มา');
+  const nameVal=str(s['ชื่อ-นามสกุล']);
+  document.getElementById('sc-name').innerHTML='<option value="">-- เลือกผู้สมัคร --</option>'+showed.map(r=>`<option value="${str(r['ชื่อ-นามสกุล'])}" ${str(r['ชื่อ-นามสกุล'])===nameVal?'selected':''}>${str(r['ชื่อ-นามสกุล'])}</option>`).join('');
+  document.getElementById('sc-name').disabled=false;
+  document.getElementById('sc-pos').value=str(s['ตำแหน่ง']);
+  document.getElementById('sc-date').value=str(s['วันที่สัมภาษณ์']);
+  document.getElementById('sc-interviewer').value=str(s['ผู้สัมภาษณ์']);
+  document.getElementById('sc-note').value=str(s['หมายเหตุ']);
+  document.getElementById('modal-sub').textContent=nameVal+' · '+str(s['ตำแหน่ง']);
+  document.getElementById('modal-title').textContent='✏️ แก้ไขผลสัมภาษณ์';
+  document.getElementById('btn-save-score').textContent='💾 บันทึกการแก้ไข';
+
+  // Set input values
+  CRITERIA.forEach(function(c,i){
+    const el=document.getElementById('range-c'+i);
+    if(el){el.value=parseFloat(s[c])||0;}
+  });
+  updateTotal();
+  document.getElementById('scoring-modal').classList.add('open');
+}
+
+async function deleteScore(rowIndex){
+  if(!confirm('ลบข้อมูลคะแนนนี้?'))return;
+  try{
+    const params=new URLSearchParams({action:'deleteScore',rowIndex});
+    const res=await fetch(APPS_SCRIPT_URL+'?'+params,{signal:AbortSignal.timeout(15000)});
+    const json=await res.json();
+    if(json.success){await loadData();}
+    else throw new Error('ลบไม่สำเร็จ');
+  }catch(err){alert('❌ '+err.message);}
+}
+
+function closeScoring(){document.getElementById('scoring-modal').classList.remove('open');editingRowIndex=null;}
+
+async function saveScore(){
+  const name=str(document.getElementById('sc-name').value);
+  if(!name){alert('กรุณาเลือกผู้สมัครก่อนบันทึก');return;}
+  const btn=document.getElementById('btn-save-score');
+  const origText=btn.textContent;
+  btn.textContent='⏳ กำลังบันทึก...';btn.disabled=true;
+  const posVal2=normPos(str(document.getElementById('sc-pos').value));
+  const ww2=WEIGHTS[posVal2]||WEIGHTS['default'];
+  const vals=CRITERIA.map(function(c,i){
+    const el=document.getElementById('range-c'+i);
+    const maxV=ww2[i]||10;
+    return Math.min(maxV,Math.max(0,parseInt(el?el.value:0)||0));
+  });
+  const weightedTotal=Math.round(vals.reduce(function(a,b){return a+b;},0)*10)/10;
+  const params=new URLSearchParams({
+    action: editingRowIndex!==null?'editScore':'saveScore',
+    name,
+    pos:posVal2,
+    date:str(document.getElementById('sc-date').value),
+    c1:vals[0],c2:vals[1],c3:vals[2],c4:vals[3],c5:vals[4],c6:vals[5]||0,c7:vals[6]||0,
+    total:weightedTotal,
+    interviewer:str(document.getElementById('sc-interviewer').value),
+    note:str(document.getElementById('sc-note').value),
+  });
+  if(editingRowIndex!==null)params.append('rowIndex',editingRowIndex);
+  try{
+    const res=await fetch(APPS_SCRIPT_URL+'?'+params.toString(),{signal:AbortSignal.timeout(15000)});
+    const json=await res.json();
+    if(json.success){
+      closeScoring();await loadData();
+      alert(editingRowIndex!==null?`✅ แก้ไขคะแนนของ ${name} เรียบร้อยแล้ว!`:`✅ บันทึกคะแนนของ ${name} เรียบร้อยแล้ว!`);
+    }else throw new Error('Script ตอบกลับผิดพลาด');
+  }catch(err){alert('❌ บันทึกไม่สำเร็จ: '+err.message);}
+  finally{btn.textContent=origText;btn.disabled=false;}
+}
+
+document.getElementById('scoring-modal').addEventListener('click',function(e){if(e.target===this)closeScoring();});
+
+// ===== CHARTS =====
+let chartTotal=null, chartRadar=null;
+
+function renderCharts(scoring){
+  if(!scoring||!scoring.length){
+    document.getElementById('score-charts-section').style.display='none';
+    document.getElementById('chart-divider').style.display='none';
+    return;
+  }
+  document.getElementById('score-charts-section').style.display='block';
+  const chartDiv=document.getElementById('chart-divider');
+  if(chartDiv)chartDiv.style.display='block';
+  const chartSub=document.getElementById('chart-sub');
+  if(chartSub)chartSub.textContent=scoring.length+' รายการ';
+
+  const labels=CRITERIA.map(function(c){return c.name;});
+  const colors=['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#db2777'];
+
+  // 1. Average per criteria
+  const avgs=CRITERIA.map(function(c){
+    const vals=scoring.map(function(s){return parseFloat(s[c.name])||0;});
+    return Math.round((vals.reduce(function(a,b){return a+b;},0)/vals.length)*10)/10;
+  });
+  
+  chartAvg=new Chart(document.getElementById('chart-avg'),{
+    type:'bar',
+    data:{
+      labels:labels,
+      datasets:[{
+        label:'คะแนนเฉลี่ย',
+        data:avgs,
+        backgroundColor:colors.map(function(c){return c+'33';}),
+        borderColor:colors,
+        borderWidth:2,
+        borderRadius:6,
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'เฉลี่ย: '+ctx.raw+'/10';}}}},
+      scales:{
+        y:{min:0,max:10,grid:{color:'#e2e8f0'},ticks:{stepSize:2}},
+        x:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+
+  // 2. Total score per candidate
+  // Sort by weighted score
+  const sorted=scoring.slice().sort(function(a,b){return calcWeightedScore(b,str(b['ตำแหน่ง']))-calcWeightedScore(a,str(a['ตำแหน่ง']));});
+  const names=sorted.map(function(s){return str(s['ชื่อ-นามสกุล']);});
+  const totals=sorted.map(function(s){return calcWeightedScore(s,str(s['ตำแหน่ง']));});
+  const maxScore=100;
+  const barColors=totals.map(function(t){return t>=PASS_SCORE?'#16a34a':t>=50?'#d97706':'#dc2626';});
+  if(chartTotal)chartTotal.destroy();
+  chartTotal=new Chart(document.getElementById('chart-total'),{
+    type:'bar',
+    data:{
+      labels:names,
+      datasets:[{
+        label:'คะแนนรวม',
+        data:totals,
+        backgroundColor:barColors.map(function(c){return c+'55';}),
+        borderColor:barColors,
+        borderWidth:2,
+        borderRadius:6,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.raw+'/100'+(ctx.raw>=PASS_SCORE?' ✅ ผ่าน':' ❌ ไม่ผ่าน');}}}},
+      scales:{
+        x:{min:0,max:100,grid:{color:'#e2e8f0'},ticks:{stepSize:10},
+          annotation:{lines:[{value:PASS_SCORE,color:'red'}]}},
+        y:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+
+  // 3. Radar - populate dropdowns
+  const sel=document.getElementById('radar-select');
+  const sel2=document.getElementById('radar-compare');
+  const curVal=sel.value, curVal2=sel2.value;
+  sel.innerHTML='<option value="all">เปรียบเทียบทุกคน (เฉลี่ย)</option>'+
+    scoring.map(function(s,i){return '<option value="'+i+'">'+str(s['ชื่อ-นามสกุล'])+'</option>';}).join('');
+  sel2.innerHTML='<option value="">— เปรียบเทียบกับ —</option>'+
+    scoring.map(function(s,i){return '<option value="'+i+'">'+str(s['ชื่อ-นามสกุล'])+'</option>';}).join('');
+  if(curVal)sel.value=curVal;
+  if(curVal2)sel2.value=curVal2;
+  updateRadar();
+}
+
+function updateRadar(){
+  const scoring=allScoring;
+  if(!scoring||!scoring.length)return;
+  const labels=CRITERIA.map(function(c){return c.name;});
+  const maxScore=10;
+  const sel=document.getElementById('radar-select').value;
+  const sel2=document.getElementById('radar-compare').value;
+
+  const datasets=[];
+
+  // Primary dataset
+  if(sel==='all'){
+    const avgs=CRITERIA.map(function(c){
+      const vals=scoring.map(function(s){return parseFloat(s[c.name])||0;});
+      return Math.round((vals.reduce(function(a,b){return a+b;},0)/vals.length)*10)/10;
+    });
+    datasets.push({label:'ค่าเฉลี่ยทุกคน',data:avgs,backgroundColor:'rgba(37,99,235,0.15)',borderColor:'#2563eb',borderWidth:2,pointBackgroundColor:'#2563eb',pointRadius:4});
+  } else {
+    const s=scoring[parseInt(sel)];
+    const vals=CRITERIA.map(function(c){return parseFloat(s[c.name])||0;});
+    datasets.push({label:str(s['ชื่อ-นามสกุล']),data:vals,backgroundColor:'rgba(37,99,235,0.15)',borderColor:'#2563eb',borderWidth:2,pointBackgroundColor:'#2563eb',pointRadius:4});
+  }
+
+  // Compare dataset
+  if(sel2!==''){
+    const s2=scoring[parseInt(sel2)];
+    const vals2=CRITERIA.map(function(c){return parseFloat(s2[c.name])||0;});
+    datasets.push({label:str(s2['ชื่อ-นามสกุล']),data:vals2,backgroundColor:'rgba(220,38,38,0.15)',borderColor:'#dc2626',borderWidth:2,pointBackgroundColor:'#dc2626',pointRadius:4});
+  }
+
+  if(chartRadar)chartRadar.destroy();
+  chartRadar=new Chart(document.getElementById('chart-radar'),{
+    type:'radar',
+    data:{labels:labels,datasets:datasets},
+    options:{
+      responsive:true,
+      plugins:{legend:{position:'top',labels:{font:{size:12},padding:16}}},
+      scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:10}},grid:{color:'#e2e8f0'},pointLabels:{font:{size:12,weight:'bold'}}}}
+    }
+  });
+}
+
+function switchPage(page){
+  document.getElementById('page-main').style.display = page==='main'?'block':'none';
+  document.getElementById('page-scoring').style.display = page==='scoring'?'block':'none';
+  document.getElementById('tab-main').classList.toggle('active', page==='main');
+  document.getElementById('tab-scoring').classList.toggle('active', page==='scoring');
+  // show/hide scoring btn in nav
+  document.getElementById('btn-open-scoring').style.display = page==='main'?'flex':'none';
+}
+
+async function loadData(){
+  const btn=document.getElementById('btn-refresh');btn.classList.add('spinning');
+  document.getElementById('error-box').style.display='none';
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('page-main').style.display='none';
+  document.getElementById('page-scoring').style.display='none';
+
+  // Progress bar animation
+  const bar=document.getElementById('loading-bar');
+  const msg=document.getElementById('loading-msg');
+  const timeoutNote=document.getElementById('loading-timeout');
+  let prog=0;
+  const progInterval=setInterval(function(){
+    prog=Math.min(prog+2, 85);
+    if(bar)bar.style.width=prog+'%';
+    if(prog>30&&msg)msg.textContent='กำลังดึงข้อมูลผู้สมัคร...';
+    if(prog>60&&msg)msg.textContent='กำลังโหลดข้อมูลคะแนน...';
+    if(prog>75&&timeoutNote)timeoutNote.style.display='block';
+  },200);
+
+  try{
+    const res=await fetch(APPS_SCRIPT_URL,{signal:AbortSignal.timeout(30000)});
+    clearInterval(progInterval);
+    if(bar)bar.style.width='95%';
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    allCandidates=Array.isArray(json)?json:(json.candidates||[]);
+    allTargets=Array.isArray(json)?[]:(json.targets||[]);
+    allScoring=Array.isArray(json)?[]:(json.scoring||[]);
+    const months=[...new Set(allCandidates.filter(r=>str(r['ชื่อ-นามสกุล'])).map(r=>r['คอลัมน์ 1']).filter(Boolean))].sort((a,b)=>(M_ORDER.indexOf(a)+1||99)-(M_ORDER.indexOf(b)+1||99));
+    document.getElementById('filter-months').innerHTML=months.map(m=>`<button class="filter-btn" id="filter-${m}" onclick="setFilter('${m}')">${m}</button>`).join('');
+    renderDashboard();renderTargets(allTargets);renderScoringTable(allScoring);renderCharts(allScoring);
+    const smeta=document.getElementById('scoring-meta');
+    if(smeta){smeta.textContent='อัปเดตล่าสุด: '+new Date().toLocaleDateString('th-TH')+' '+new Date().toLocaleTimeString('th-TH');}
+    const now=new Date();
+    const hm=document.getElementById('header-meta');
+    const lu=document.getElementById('last-updated');
+    if(hm)hm.textContent='อัปเดตล่าสุด: '+now.toLocaleDateString('th-TH')+' '+now.toLocaleTimeString('th-TH');
+    if(lu)lu.textContent=allCandidates.length+' records';
+    if(bar)bar.style.width='100%';
+    setTimeout(function(){
+      document.getElementById('loading').style.display='none';
+      switchPage(document.getElementById('tab-scoring').classList.contains('active')?'scoring':'main');
+    },200);
+  }catch(err){
+    clearInterval(progInterval);
+    if(bar)bar.style.width='100%';
+    setTimeout(function(){
+      document.getElementById('loading').style.display='none';
+      document.getElementById('page-main').style.display='block';
+      const errBox=document.getElementById('error-box');
+      const errMsg=document.getElementById('error-msg');
+      if(errBox)errBox.style.display='block';
+      if(errMsg)errMsg.textContent=' '+err.message+' — กด Refresh เพื่อลองใหม่';
+    },200);
+  }
+  btn.classList.remove('spinning');
+}
+window.addEventListener('load',loadData);
+</script>
+</body>
+</html>
